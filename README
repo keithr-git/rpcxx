@@ -1,0 +1,58 @@
+RPCXX is a C++ Remote Procedure Call library that attempts to make it
+easy to write RPC services.
+
+The primary tool provided is the RPCXX_METHOD macro, which is used to
+define a single RPC function within an RPC protocol definition.
+For example:
+
+class Test : public RPCXX::Protocol
+{
+public:
+    RPCXX_FUNCTION(1, int32_t, f1, RPCXX::in<int32_t>, RPCXX::out<int32_t>);
+
+    Test(RPCXX::Connection& c)
+      : RPCXX::Protocol(c), f1(this)
+    { }
+};
+
+This is (roughly) equivalent to declaring the f1 method as:
+
+    int32_t f1(const int32_t, int32_t&);
+
+(Since this is a network protocol, it is recommended to use types
+with a universally-defined size, such as int32_t, which is 32 bits
+everywhere).
+
+Each method is actually declared as a contained object, rather than
+a member function, so each method must be named in the constructor's
+initialization list, with "this" as the single argument.  That allows
+each nested object to be initialized with a reference to the protocol
+instance, which it needs in order to properly parse incomining requests.
+
+On the server, each method is defined as follows:
+
+int32_t Test1::f1::operator()(int32_t i, int32_t& j)
+{
+    int32_t result;
+
+    // Do whatever;
+    j = /* something */;
+    return result;
+}
+
+On the client side, using a remote Test object looks very similar to
+using a local object.  The object is initialized with the a Client
+connection object:
+
+int main()
+{
+    RPCXX::Client c("localhost", 4242);
+    Test t(c);
+    int32_t result;
+    int32_t i = 1;
+    int32_t j;
+
+    result = t.f1(i, j);
+    printf("%d %d\n", result, j); // The two values modified by the call.
+    return result;
+}
