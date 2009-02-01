@@ -1,0 +1,27 @@
+-   Create layered Connection classes - one for stream and one for datagram
+    transports.  I think buffered reads and non-buffered writes are the
+    best answer - UDP needs exactly one write per procedure call, and 
+    single-threaded operation needs every procedure call to get written
+    before it waits for the answer.  Only multi-threaded mode can benefit
+    from buffered writes at all, and then only under load.  I'll burn
+    that bridge when I come to it.
+
+-   Flesh out the RPC engine - more error checking.
+
+-   Add a set of exception classes.
+
+-   Finish all the function template objects.
+
+-   Finish the marshal specializations - most of them still need
+    toNet and fromNet.
+
+-   Add support for additional data types - std::string, Buffer (for
+    char* arguments), STL containers, etc.
+
+-   Split the offset and allocated flags into a DataBuffer class, so
+    Buffer can be just for char* arguments (just pointer and length).
+
+-   Add multi-threaded mode.
+
+-   See if there's a way to make the RPC methods actual class member
+    functions.
